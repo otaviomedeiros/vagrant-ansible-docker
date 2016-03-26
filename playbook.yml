@@ -2,7 +2,7 @@
 - hosts: all
   become: yes
   become_method: sudo
-
+  
   tasks:
   - name: apt-get update
     apt: update_cache=yes
@@ -25,8 +25,14 @@
   - name: Verify that APT is pulling from the right repository
     shell: apt-cache policy docker-engine  
 
+  - shell: uname -r
+    register: uname
+  
+  - set_fact:
+        extra_image_cmd: "linux-image-extra-{{ uname.stdout }}"
+
   - name: Install the linux-image-extra kernel package
-    shell: apt-get install linux-image-extra-$(uname -r) -y
+    apt: name={{ extra_image_cmd }} 
 
   - name: On Ubuntu 14.04 apparmor is required
     apt: name=apparmor
