@@ -31,8 +31,8 @@
   - set_fact:
         extra_image_cmd: "linux-image-extra-{{ uname.stdout }}"
 
-  - name: Install the linux-image-extra kernel package
-    apt: name={{ extra_image_cmd }} 
+  - name: Install the {{ extra_image_cmd }} kernel package
+    apt: name={{ extra_image_cmd }} force=yes
 
   - name: On Ubuntu 14.04 apparmor is required
     apt: name=apparmor
@@ -45,3 +45,22 @@
 
   - name: Create the docker group and add vagrant user
     shell: usermod -aG docker vagrant
+
+
+
+
+  - shell: uname -s
+    register: uname_s
+
+  - shell: uname -m
+    register: uname_m
+
+  - set_fact:
+        docker_compose_url: "https://github.com/docker/compose/releases/download/1.6.2/docker-compose-{{ uname_s.stdout }}-{{ uname_m.stdout}}"
+
+  - name: Install docker compose
+    get_url: url={{ docker_compose_url }} dest=/usr/local/bin/docker-compose
+
+  - name: Apply executable permissions do docker compose
+    file: path=/usr/local/bin/docker-compose mode=755
+
